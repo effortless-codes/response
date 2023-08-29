@@ -4,6 +4,8 @@ return [
 
     'app_name' => env('APP_NAME', 'UNKNOWN APP NAME'),
 
+    'log_event_class' => \Winata\Core\Response\Events\OnErrorEvent::class,
+
     /*
         * add credential logging
      */
@@ -12,7 +14,15 @@ return [
         'column' => 'performed_id'
     ],
 
-    'reportable' => true,
+    'reportable' => [
+        'telegram' => [
+            'logging' => true
+        ],
+        'database' => [
+            'logging' => true,
+            'store_trace' => false,
+        ],
+    ],
     'driver' => [
         'telegram' => [
             'token' => '6386997255:AAH099F7fjaOD8O4NGYhU-kY27xWfzMK1_A', // your api token

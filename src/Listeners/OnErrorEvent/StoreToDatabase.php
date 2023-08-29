@@ -19,9 +19,16 @@ class StoreToDatabase
      */
     public function handle(object $event): void
     {
-        $inputs = getFillableAttribute(Exception::class, $event->carrier);
-        $inputs['trace'] = json_encode($inputs['trace']);
-        Exception::query()
-            ->create($inputs);
+        $isLogging = config('winata.response.reportable.database');
+        if ($isLogging['logging']){
+            $inputs = getFillableAttribute(Exception::class, $event->carrier);
+            if ($isLogging['store_trace']){
+                $inputs['trace'] = json_encode($inputs['trace']);
+            }else{
+                $inputs['trace'] = null;
+            }
+            Exception::query()
+                ->create($inputs);
+        }
     }
 }

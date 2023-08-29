@@ -34,12 +34,12 @@ class BaseServiceProvider extends ServiceProvider
         );
 
         $this->app->events->listen(
-            OnErrorEvent::class,
+            config('winata.response.log_event_class'),
             StoreToDatabase::class
         );
 
         $this->app->events->listen(
-            OnErrorEvent::class,
+            config('winata.response.log_event_class'),
             SendToTelegram::class
         );
 

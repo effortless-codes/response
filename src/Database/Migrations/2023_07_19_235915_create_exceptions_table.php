@@ -17,6 +17,7 @@ return new class extends Migration {
                 ->constrained('users')
                 ->onDelete('cascade');
             $table->string('performer')->default('system');
+            $table->string('ip');
 
             $table->string('url')->nullable();
             $table->string('rc')->nullable();

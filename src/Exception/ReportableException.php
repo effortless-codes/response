@@ -31,6 +31,7 @@ class ReportableException extends ExceptionHandler
     {
         $data = [
             'url' => request()->url() ?? null,
+            'ip' => request()->ip(),
             'rc' => null,
             'data' => null,
             'source' => $exception::class,
@@ -54,8 +55,6 @@ class ReportableException extends ExceptionHandler
             $data['data'] = $exception->data;
         }
 
-        if (config('winata.response.reportable')){
-            event(new OnErrorEvent(carrier: $data));
-        }
+        event(new OnErrorEvent(carrier: $data));
     }
 }

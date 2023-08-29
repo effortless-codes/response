@@ -37,6 +37,7 @@ class Exception extends Model
         'line',
         'trace',
         'url',
+        'ip',
     ];
 
     protected $hidden = [
