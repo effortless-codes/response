@@ -7,6 +7,9 @@ use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Winata\Core\Response\Contracts\OnResponse;
 use Winata\Core\Response\Enums\DefaultResponseCode;
@@ -21,9 +24,9 @@ class Response implements Responsable
      * @param string|null $message
      */
     public function __construct(
-        protected OnResponse              $code = DefaultResponseCode::SUCCESS,
-        protected Arrayable|array|null $data = null,
-        protected ?string              $message = null,
+        protected OnResponse                                                                                                       $code = DefaultResponseCode::SUCCESS,
+        protected JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|\Illuminate\Pagination\CursorPaginator|array|null $data = null,
+        protected ?string                                                                                                          $message = null,
     )
     {
     }
