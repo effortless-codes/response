@@ -35,15 +35,9 @@ class BaseServiceProvider extends ServiceProvider
 
         $this->app->events->listen(
             config('winata.response.log_event_class'),
-            StoreToDatabase::class
-        );
-
-        $this->app->events->listen(
-            config('winata.response.log_event_class'),
             SendToTelegram::class
         );
 
         $this->publishes([__DIR__ . '/../config/winata/response.php' => config_path('winata/response.php')], 'config');
-        $this->publishes([__DIR__.'/database/migrations/2023_07_19_235915_create_exceptions_table.php' => database_path('migrations/2023_07_19_235915_create_exceptions_table.php')], 'database');
     }
 }

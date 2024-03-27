@@ -62,10 +62,10 @@ trait CatchableError
         if ($e instanceof NotFoundHttpException) {
             return new BaseException(DefaultResponseCode::ERR_ROUTE_NOT_FOUND, $e->getMessage(), null, $e);
         }
-
-        if (config('app.debug')) {
-            return $e;
-        }
+//
+//        if (config('app.debug')) {
+//            return $e;
+//        }
 
         return new BaseException(
             rc: DefaultResponseCode::ERR_UNKNOWN,

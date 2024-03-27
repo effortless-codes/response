@@ -3,10 +3,13 @@
 namespace Winata\Core\Response\Enums;
 
 use Symfony\Component\HttpFoundation\Response;
+use Winata\Core\Response\Concerns\HasOnResponse;
 use Winata\Core\Response\Contracts\OnResponse;
 
 enum DefaultResponseCode implements OnResponse
 {
+    use HasOnResponse;
+
     case SUCCESS;
     case ERR_VALIDATION;
     case ERR_AUTHENTICATION;
@@ -46,13 +49,5 @@ enum DefaultResponseCode implements OnResponse
         };
     }
 
-    /**
-     * Set error to readable message string.
-     *
-     * @return string
-     */
-    public function message(): string
-    {
-        return ucwords(strtolower(str_replace(['ERR_', '_'], ['', ' '], $this->name)));
-    }
+
 }

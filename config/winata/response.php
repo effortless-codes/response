@@ -18,10 +18,6 @@ return [
         'telegram' => [
             'logging' => true
         ],
-        'database' => [
-            'logging' => true,
-            'store_trace' => false,
-        ],
     ],
     'driver' => [
         'telegram' => [

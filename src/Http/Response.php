@@ -2,7 +2,6 @@
 
 namespace Winata\Core\Response\Http;
 
-use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
@@ -11,7 +10,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Arr;
 use Winata\Core\Response\Contracts\OnResponse;
 use Winata\Core\Response\Enums\DefaultResponseCode;
 
@@ -86,27 +84,6 @@ class Response implements Responsable
         return array_merge($resp, [
             'payload' => is_null($this->data) ? $this->data : [JsonResource::$wrap => $this->data]
         ]);
-        /*$resp = [
-            'rc' => $this->code->name,
-            'message' => $this->getMessage(),
-            'timestamp' => now(),
-        ];
-
-        if ($this->data instanceof Paginator || $this->data instanceof CursorPaginator) {
-            $paginatorPayload = $this->data->toArray();
-
-            return array_merge(
-                $resp,
-                Arr::except($paginatorPayload, ['data']),
-                ['payload' => $paginatorPayload['data']],
-            );
-        }
-
-        if ($this->data instanceof Arrayable) {
-            return array_merge($resp, ['payload' => $this->data->toArray()]);
-        }
-
-        return array_merge($resp, ['payload' => $this->data]);*/
     }
 
     /**
