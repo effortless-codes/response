@@ -6,6 +6,8 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Winata\Core\Response\Contracts\OnResponse;
@@ -19,13 +21,13 @@ class Controller
     use ValidatesRequests;
 
     /**
-     * @param Arrayable|LengthAwarePaginator|CursorPaginator|array<int|string, mixed>|null $data
+     * @param JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|array<int|string, mixed>|null $data
      * @param DefaultResponseCode $rc
      * @param string|null $message
      * @return Response
      */
     public function response(
-        Arrayable|LengthAwarePaginator|CursorPaginator|array|null $data = null,
+        JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|array|null $data = null,
         OnResponse                                                   $rc = DefaultResponseCode::SUCCESS,
         string                                                    $message = null,
     ): Response
