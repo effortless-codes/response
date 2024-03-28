@@ -3,7 +3,7 @@
     "description": "Response",
     "type": "library",
     "license": "MIT",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "authors": [
         {
             "name": "Winata bayu",
@@ -16,7 +16,9 @@
     "autoload": {
         "psr-4": {
             "Winata\\Core\\Response\\": "src/"
-        }
+        }, "files": [
+            "helpers.php"
+        ]
     },
     "extra": {
         "laravel": {
