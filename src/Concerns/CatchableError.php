@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -14,6 +15,9 @@ use Winata\Core\Response\Contracts\OnResponse;
 use Winata\Core\Response\Enums\DefaultResponseCode;
 use Winata\Core\Response\Exception\BaseException;
 use Winata\Core\Response\Exception\HandleUnexpectedJson;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 trait CatchableError
 {
@@ -59,8 +63,20 @@ trait CatchableError
 //            return new BaseException(DefaultResponseCode::ERR_AUTHENTICATION, $e->getMessage(), null, $e);
 //        }
 
+        if ($e instanceof AuthenticationException) {
+            return new BaseException(DefaultResponseCode::ERR_AUTHENTICATION, $e->getMessage(), null, $e);
+        }
+
         if ($e instanceof NotFoundHttpException) {
             return new BaseException(DefaultResponseCode::ERR_ROUTE_NOT_FOUND, $e->getMessage(), null, $e);
+        }
+
+        if ($e instanceof UniqueConstraintViolationException) {
+            return new BaseException(DefaultResponseCode::ERR_UNIQUE_RECORD, 'Unique Records Violation in Table', null, $e);
+        }
+
+        if ($e instanceof AuthorizationException || $e instanceof UnauthorizedException) {
+            return new BaseException(DefaultResponseCode::ERR_ACTION_UNAUTHORIZED, $e->getMessage(), null, $e);
         }
 //
 //        if (config('app.debug')) {
