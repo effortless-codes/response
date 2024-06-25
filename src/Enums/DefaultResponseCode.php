@@ -22,6 +22,7 @@ enum DefaultResponseCode implements OnResponse
     case ERR_UNKNOWN;
     case ERR_UNIQUE_RECORD;
     case ERR_ACTION_UNAUTHORIZED;
+    case ERR_RECORD_CONSTRAINT;
 
     /**
      * Determine httpCode from response code.

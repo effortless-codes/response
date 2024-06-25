@@ -3,6 +3,7 @@
 namespace Winata\Core\Response\Concerns;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -77,6 +78,14 @@ trait CatchableError
 
         if ($e instanceof AuthorizationException || $e instanceof UnauthorizedException) {
             return new BaseException(DefaultResponseCode::ERR_ACTION_UNAUTHORIZED, $e->getMessage(), null, $e);
+        }
+
+        if($e instanceof QueryException) {
+            $message = $e->getMessage();
+            if (str($message)->contains('Foreign key violation') ){
+                return new BaseException(DefaultResponseCode::ERR_RECORD_CONSTRAINT, __('Record Probably in use') , null, $e);
+            }
+            return new BaseException(DefaultResponseCode::ERR_RECORD_CONSTRAINT, null , null, $e);
         }
 //
 //        if (config('app.debug')) {
