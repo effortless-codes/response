@@ -94,6 +94,7 @@ trait CatchableError
 
         return new BaseException(
             rc: DefaultResponseCode::ERR_UNKNOWN,
+            message: $e->getMessage(),
             data: [
                 'base_url' => $request->getBaseUrl(),
                 'path' => $request->getUri(),
