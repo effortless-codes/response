@@ -20,14 +20,14 @@ class HandleUnexpectedJson extends Exception implements Arrayable, Responsable
      * @param Throwable|null $previous
      */
     public function __construct(
-        public ?OnResponse       $rc = DefaultResponseCode::ERR_UNKNOWN,
-        ?string              $message = null,
-        public array|null $data = null,
-        ?Throwable           $previous = null
+        public ?OnResponse $rc = DefaultResponseCode::ERR_UNKNOWN,
+        ?string            $message = null,
+        public array|null  $data = null,
+        ?Throwable         $previous = null
     )
     {
         $code = $rc->httpCode() ?? 0;
-        if (is_null($message)){
+        if (is_null($message)) {
             $message = $this->rc->message();
         }
         parent::__construct($message, $code, $previous);

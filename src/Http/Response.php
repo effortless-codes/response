@@ -23,9 +23,9 @@ class Response implements Responsable
      * @param string|null $message
      */
     public function __construct(
-        protected OnResponse                                                                                                       $code = DefaultResponseCode::SUCCESS,
-        protected JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|\Illuminate\Pagination\CursorPaginator|array|null $data = null,
-        protected ?string                                                                                                          $message = null,
+        public OnResponse                                                                                                       $code = DefaultResponseCode::SUCCESS,
+        public JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|\Illuminate\Pagination\CursorPaginator|array|null $data = null,
+        public ?string                                                                                                          $message = null,
     )
     {
     }
