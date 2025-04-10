@@ -1,15 +1,15 @@
 <?php
 
-if (!function_exists('array_to_object')) {
+use Winata\Core\Response\Exception\ApiDumpException;
 
+if (!function_exists('ddapi')) {
     /**
-     * Convert Array into Object in deep
-     *
-     * @param array $array
-     * @return
+     * @param mixed $data
+     * @return mixed
+     * @throws ApiDumpException
      */
-    function array_to_object($array)
+    function ddapi(mixed $data)
     {
-        return json_decode(json_encode($array));
+        throw new ApiDumpException($data);
     }
 }

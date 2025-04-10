@@ -2,34 +2,33 @@
 
 return [
 
-    'app_name' => env('APP_NAME', 'UNKNOWN APP NAME'),
+    /*
+    |--------------------------------------------------------------------------
+    | Force All Exception Responses to JSON
+    |--------------------------------------------------------------------------
+    |
+    | When set to true, all exception responses will be returned in JSON format,
+    | even for requests that do not explicitly accept JSON. This is useful for
+    | ensuring consistency across API responses.
+    |
+    */
 
-    'log_event_class' => \Winata\Core\Response\Events\OnErrorEvent::class,
+    'force_to_json' => true,
 
     /*
-        * add credential logging
-     */
-    'performer' => [
-        'model' => \App\Models\User::class, // accept only from auth user
-        'column' => 'performed_id'
-    ],
+    |--------------------------------------------------------------------------
+    | Enable Debug Information in Responses
+    |--------------------------------------------------------------------------
+    |
+    | When set to true, additional debug information such as stack traces,
+    | file names, and line numbers will be included in the error responses.
+    | It is recommended to keep this disabled in production.
+    |
+    | Note: We use env() directly here because the config system is not
+    | fully loaded at the time configuration files are processed.
+    |
+    */
 
-    'reportable' => [
-        'telegram' => [
-            'logging' => true
-        ],
-    ],
-    'driver' => [
-        'telegram' => [
-            'token' => '6386997255:AAH099F7fjaOD8O4NGYhU-kY27xWfzMK1_A', // your api token
-            'chat_id' => '-1001948695866',
-            'formatting' => [
-                'title' => '*ERROR EXCEPTION*',
-                'cc' => '#winatabayu00',
-            ],
-        ],
-        'database' => [
+    'enable_debug' => env('APP_DEBUG', false),
 
-        ]
-    ],
 ];

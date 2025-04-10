@@ -8,33 +8,57 @@ use Throwable;
 use Winata\Core\Response\Contracts\OnResponse;
 use Winata\Core\Response\Enums\DefaultResponseCode;
 
+/**
+ * Class BaseException
+ *
+ * A standardized base exception class designed to unify API error responses.
+ * It supports an enum-based response code, custom messages, optional payload,
+ * and enhanced debug information.
+ */
 class BaseException extends Exception implements Arrayable
 {
+    /**
+     * The response code enum used to determine status and message.
+     *
+     * @var OnResponse
+     */
+    public OnResponse $rc;
 
     /**
-     * Base BaseException constructor.
+     * Additional data to be returned with the response.
      *
-     * @param OnResponse $rc
-     * @param ?string $message
-     * @param array|null $data
-     * @param Throwable|null $previous
+     * @var array|null
+     */
+    public ?array $data;
+
+    /**
+     * Create a new BaseException instance.
+     *
+     * @param OnResponse|null $rc Enum implementing OnResponse, default to ERR_UNKNOWN.
+     * @param string|null $message Optional message to override enum default.
+     * @param array|null $data Optional additional payload to return.
+     * @param Throwable|null $previous Optional previous exception for chaining.
      */
     public function __construct(
-        public OnResponse       $rc = DefaultResponseCode::ERR_UNKNOWN,
-        ?string              $message = null,
-        public array|null $data = null,
-        ?Throwable           $previous = null
-    )
-    {
+        OnResponse $rc = DefaultResponseCode::ERR_UNKNOWN,
+        ?string $message = null,
+        ?array $data = null,
+        ?Throwable $previous = null
+    ) {
+        $this->rc = $rc;
+        $this->data = $data;
+
         $code = $rc->httpCode() ?? 0;
-        if (is_null($message)){
+
+        if (is_null($message)) {
             $message = $this->rc->message();
         }
-        parent::__construct($message, $code, $previous);
+
+        parent::__construct($message, $code, $previous ?? $this->getPrevious());
     }
 
     /**
-     * Get response code.
+     * Get the response code name from the enum.
      *
      * @return string
      */
@@ -44,7 +68,9 @@ class BaseException extends Exception implements Arrayable
     }
 
     /**
-     * Get response message.
+     * Get the response message to be sent to the client.
+     * If the app is in debug mode and a previous exception exists,
+     * it returns the previous exception's message instead.
      *
      * @return string
      */
@@ -58,7 +84,7 @@ class BaseException extends Exception implements Arrayable
     }
 
     /**
-     * Get error data.
+     * Get the optional error payload.
      *
      * @return array|null
      */
@@ -67,7 +93,11 @@ class BaseException extends Exception implements Arrayable
         return $this->data;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Convert the exception into an array for JSON responses.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         $carrier = [
@@ -77,12 +107,13 @@ class BaseException extends Exception implements Arrayable
             'payload' => $this->getErrorData(),
         ];
 
-        if (config('app.debug') && $this->getPrevious() instanceof Throwable) {
+        if (config('winata.response.enable_debug')) {
             $carrier['debug'] = [
-                'class' => get_class($this->getPrevious()),
-                'file' => $this->getPrevious()->getFile(),
-                'line' => $this->getPrevious()->getLine(),
-                'trace' => $this->getPrevious()->getTrace(),
+                'origin_message' => $this->getMessage(),
+                'class' => get_class($this),
+                'file' => $this->getFile(),
+                'line' => $this->getLine(),
+                'trace' => $this->getTrace(),
             ];
         }
 

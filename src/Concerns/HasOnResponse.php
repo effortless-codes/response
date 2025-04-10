@@ -2,11 +2,17 @@
 
 namespace Winata\Core\Response\Concerns;
 
+/**
+ * Trait HasOnResponse
+ *
+ * Adds formatting capability to enum names, converting them into
+ * human-readable messages. Typically used in error responses.
+ */
 trait HasOnResponse
 {
-
     /**
-     * Set error to readable message string.
+     * Convert an enum name (e.g., 'ERR_INVALID_OPERATION') into a
+     * human-readable string (e.g., 'Invalid Operation').
      *
      * @return string
      */

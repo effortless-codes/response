@@ -5,98 +5,136 @@ namespace Winata\Core\Response\Http;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Winata\Core\Response\Contracts\OnResponse;
 use Winata\Core\Response\Enums\DefaultResponseCode;
+use DateTimeInterface;
 
+/**
+ * Class Response
+ *
+ * A standardized API response wrapper that formats data with consistent structure.
+ * All paginator types are merged inside 'payload' (no 'meta' separation),
+ */
 class Response implements Responsable
 {
     /**
      * Response constructor.
      *
-     * @param OnResponse $code
-     * @param Arrayable|array<int|string, mixed>|null $data
+     * @param JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|Collection|string|array|null $data
      * @param string|null $message
+     * @param OnResponse $code
      */
     public function __construct(
-        public OnResponse                                                                                                       $code = DefaultResponseCode::SUCCESS,
-        public JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|\Illuminate\Pagination\CursorPaginator|array|null $data = null,
-        public ?string                                                                                                          $message = null,
-    )
-    {
+        protected JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|Collection|string|array|null $data = null,
+        protected ?string $message = null,
+        protected OnResponse $code = DefaultResponseCode::SUCCESS,
+    ) {
     }
 
     /**
-     * Get response data.
+     * Returns the response data converted to array or raw string if applicable.
      *
-     * @return array<int|string, mixed>|null
+     * @return array|string|null
      */
-    public function getData(): ?array
+    public function getData(): array|string|null
     {
-        return $this->data instanceof Arrayable ? $this->data->toArray() : $this->data;
+        if ($this->data instanceof Arrayable) {
+            return $this->data->toArray();
+        }
+
+        if ($this->data instanceof Collection) {
+            return $this->data->all();
+        }
+
+        return $this->data;
     }
 
     /**
-     * Get response message.
+     * Get the response message.
      *
-     * @return string|null
+     * @return string
      */
-    public function getMessage(): ?string
+    public function getMessage(): string
     {
         return $this->message ?? $this->code->message();
     }
 
     /**
-     * Get response data.
+     * Constructs the response payload structure.
      *
      * @return array<string, mixed>
      */
     public function getResponseData(): array
     {
-        $resp = [
+        $timestamp = now();
+        if ($timestamp instanceof DateTimeInterface) {
+            $timestamp = $timestamp->toIso8601String();
+        }
+
+        $base = [
             'rc' => $this->code->name,
             'message' => $this->getMessage(),
-            'timestamp' => now(),
+            'timestamp' => $timestamp,
         ];
 
+        // Null or string
+        if (is_null($this->data)) {
+            return [...$base, 'payload' => null];
+        }
 
+        if (is_string($this->data)) {
+            return [...$base, 'payload' => $this->data];
+        }
+
+        // Resource or paginator
+        if (
+            ($this->data instanceof JsonResource || $this->data instanceof ResourceCollection) &&
+            ($this->data->resource ?? null) instanceof AbstractPaginator
+        ) {
+            /** @var AbstractPaginator $paginator */
+            $paginator = $this->data->resource;
+
+            return [...$base, 'payload' => $paginator->toArray()];
+        }
+
+        // Paginator directly
         if ($this->data instanceof Paginator) {
-            return array_merge($resp, ['payload' => $this->data->toArray()]);
+            return [...$base, 'payload' => $this->data->toArray()];
         }
 
-        if ($this->data instanceof Arrayable) {
-            return array_merge($resp, ['payload' => [JsonResource::$wrap => $this->data->toArray()]]);
-        }
-
-        if (($this->data?->resource ?? null) instanceof AbstractPaginator) {
-            return array_merge($resp, [
-                'payload' => array_merge(
-                    $this->data->resource->toArray(),
-                    [JsonResource::$wrap => $this->getData()]
-                )
-            ]);
-        }
-
-        return array_merge($resp, [
-            'payload' => is_null($this->data) ? $this->data : [JsonResource::$wrap => $this->data]
-        ]);
+        // Arrayable / Collection / array
+        return [
+            ...$base,
+            'payload' => is_array($this->data) ? $this->data : [JsonResource::$wrap => $this->getData()],
+        ];
     }
 
     /**
-     * {@inheritDoc}
+     * Convert to HTTP response.
      *
-     * @throws \JsonException
+     * @param Request $request
+     * @return SymfonyResponse
      */
-    public function toResponse($request): \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\Response
+    public function toResponse($request): SymfonyResponse
     {
-        if ($request->expectsJson()) {
-            return response()->json($this->getResponseData(), $this->code->httpCode());
-        }
+        $data = $this->getResponseData();
+        $status = $this->code->httpCode();
 
-        return new \Illuminate\Http\Response(json_encode($this->getResponseData(), JSON_THROW_ON_ERROR), $this->code->httpCode());
+        return $request->expectsJson()
+            ? response()->json($data, $status)
+            : new HttpResponse(
+                json_encode($data, JSON_THROW_ON_ERROR),
+                $status,
+                ['Content-Type' => 'application/json']
+            );
     }
 }
