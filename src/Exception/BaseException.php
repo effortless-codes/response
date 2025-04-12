@@ -34,7 +34,7 @@ class BaseException extends Exception implements Arrayable
     /**
      * Create a new BaseException instance.
      *
-     * @param OnResponse|null $rc Enum implementing OnResponse, default to ERR_UNKNOWN.
+     * @param OnResponse $rc Enum implementing OnResponse, default to ERR_UNKNOWN.
      * @param string|null $message Optional message to override enum default.
      * @param array|null $data Optional additional payload to return.
      * @param Throwable|null $previous Optional previous exception for chaining.
@@ -107,13 +107,14 @@ class BaseException extends Exception implements Arrayable
             'payload' => $this->getErrorData(),
         ];
 
-        if (config('winata.response.enable_debug')) {
+        if (config('winata.response.enable_debug') && $this->getPrevious() instanceof Throwable) {
+            $carrier['trace'] = $this->getPrevious();
             $carrier['debug'] = [
-                'origin_message' => $this->getMessage(),
-                'class' => get_class($this),
-                'file' => $this->getFile(),
-                'line' => $this->getLine(),
-                'trace' => $this->getTrace(),
+                'origin_message' => $this->getPrevious()->getMessage(),
+                'class' => get_class($this->getPrevious()),
+                'file' => $this->getPrevious()->getFile(),
+                'line' => $this->getPrevious()->getLine(),
+                'trace' => $this->getPrevious()->getTrace(),
             ];
         }
 

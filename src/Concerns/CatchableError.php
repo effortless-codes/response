@@ -57,6 +57,10 @@ trait CatchableError
             return response()->json($e->toArray(), $e->rc->httpCode());
         }
 
+        if ($e instanceof BaseException && $e->getPrevious()) {
+            return parent::render($request, $e->getPrevious());
+        }
+
         return parent::render($request, $e);
     }
 
