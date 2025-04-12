@@ -43,16 +43,12 @@ class Response implements Responsable
     /**
      * Returns the response data converted to array or raw string if applicable.
      *
-     * @return array|string|null
+     * @return JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|Collection|array|null
      */
-    public function getData(): array|string|null
+    public function getData(): JsonResource|ResourceCollection|Arrayable|LengthAwarePaginator|CursorPaginator|Collection|array|null
     {
         if ($this->data instanceof Arrayable) {
             return $this->data->toArray();
-        }
-
-        if ($this->data instanceof Collection) {
-            return $this->data->all();
         }
 
         return $this->data;
@@ -123,6 +119,7 @@ class Response implements Responsable
      *
      * @param Request $request
      * @return SymfonyResponse
+     * @throws \JsonException
      */
     public function toResponse($request): SymfonyResponse
     {
